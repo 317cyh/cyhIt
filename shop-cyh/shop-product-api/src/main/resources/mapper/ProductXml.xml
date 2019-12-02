@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fh.dao.ProductDao">
+
+
+    <sql id="commonsSql">
+        <where>
+            and status=1
+            <if test="shopProductPage.cateId != null">
+                and  type_id lIKE CONCAT('%', #{shopProductPage.cateId},'%')
+
+            </if>
+            <if test="shopProductPage.brandId != null">
+                and brand_id=#{shopProductPage.brandId}
+            </if>
+        </where>
+    </sql>
+    <!--查询产品展示条数-->
+    <select id="queryProductCount" resultType="java.lang.Long">
+        select count(id) from t_shop_product
+        <include refid="commonsSql"></include>
+    </select>
+
+    <!--查询产品展示数据-->
+    <select id="queryList" resultType="com.fh.model.ShopProduct">
+        select * from t_shop_product
+        <include refid="commonsSql"></include>
+         limit #{pageBean.start},#{pageBean.length}
+    </select>
+
+    <!--查询产品加入购物车数据-->
+    <select id="queryProductInfo" resultType="com.fh.model.ShopProduct">
+        select id,price,mainimg,name,subtitle from t_shop_product  where id=#{productId}
+    </select>
+</mapper>

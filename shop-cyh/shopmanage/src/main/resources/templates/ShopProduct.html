@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="../static/js/jquery.1.9.min.js"></script>
+<script src="../static/js/zTree_v3-master/js/jquery.ztree.core.min.js"></script>
+<link href="../static/js/zTree_v3-master/css/zTreeStyle/zTreeStyle.css" rel="stylesheet" type="text/css">
+<body>
+
+
+    <input type="hidden" id="main_img">
+    商品名称:<input id="name"><br>
+    商品类型:
+    <center>
+    <div class="zTreeDemoBackground left">
+        <ul id="treeDemo" class="ztree"></ul>
+    </div>
+    </center>
+    <input id="typename" readonly="readonly"><br>
+    <input type="hidden" id="type_id"><br>
+    宣传标题:<input id="subtitle"><br>
+    主图片:
+    <!--为了简单用两个方法-->
+    <input type="file" id="file" onchange="uplaodFile()"><br>
+    品牌:<select id="brandid">
+        <option value="">--请选择--</option>
+         </select><br>
+
+    商品描述:<textarea id="detail"></textarea><br>
+    价格:<input type="number" id="prive"><br>
+    库存:<input type="number" id="stock"><br>
+    状态:<input type="radio" name="status" value="1">有效
+    <input type="radio" name="status" value="2">无效<br>
+    <input type="button" value="提交" onclick="addProduct()">
+
+</body>
+</html>
+<script>
+    $(function(){
+        queryBrand();
+    })
+    function queryBrand(){
+        $.post(
+            "/test/queryBrandId",
+            {},
+            function(data){
+                var s="";
+                for (var i=0;i<data.length;i++){
+                s+="<option value='"+data[i].id+"'>"+data[i].name+"</option>";
+                }
+                $("#brandid").append(s);
+
+
+            }
+        )
+    }
+</script>
+<script>
+    function addProduct() {
+        var brand_id= $("#brandid ").val();
+
+        var name = $("#name").val();
+        var subtitle = $("#subtitle").val();
+        var main_img = $("#main_img").val();
+        var detail = $("#detail").val();
+        var prive = $("#prive").val();
+        var stock = $("#stock").val();
+        var type_id = $("#type_id").val();
+        var status = "";
+        $("[name='status']:checked").each(function () {
+            status += this.value;
+        });
+
+
+     $.post(
+         "/test/addShopProduct",
+         {"name": name,
+             "subtitle": subtitle,
+             "main_img": main_img,
+             "detail": detail,
+             "price": prive,
+             "stock": stock,
+             "brand_id": brand_id,
+             "status": status,
+             "type_id":type_id
+         },
+
+         function(data){
+             if(data=="1"){
+                 alert("成功！")
+                 location.reload();
+             }else {
+                 alert("失败！")
+             }
+         }
+     )
+    }
+</script>
+<script>
+    function uplaodFile() {
+        var form = new FormData();
+        form.append("file", $("#file").get(0).files[0]);
+        $.ajax({
+            contentType: false,
+            processData: false,
+            url: "/test/uploadFile",
+            data: form,
+            dataType: "json",
+            type: "post",
+            success: function (res) {
+
+                $("#main_img").val(res.aaa);
+
+            },
+            erreo: function () {
+                alert("程序出现问题！")
+            }
+        })
+    }
+</script>
+<script>
+    var setting = {
+        callback: {
+            onClick: zTreeOnClick
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                pIdKey: "pid"
+            },
+            key: {
+                name: "name"
+            }
+        }
+    };
+
+    function zTreeOnClick(event, treeId, treeNode) {
+        var names="";
+        var ids="";
+        var id = treeNode.id;
+        var name = treeNode.name;
+        names+=name+",";
+        ids+=id+","
+        $("#typename").val( $("#typename").val()+names);
+        $("#type_id").val( $("#type_id").val()+ids);
+
+
+
+    };
+    $(document).ready(function () {
+        $.post(
+            "/test/queryType",
+            function (daa) {
+                zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, daa);
+                zTreeObj.expandAll(true);
+
+            }
+        );
+    });
+</script>

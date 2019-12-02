@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="../static/js/jquery.1.9.min.js"></script>
+<link href="../static/js/DataTables-1.10.18/css/jquery.dataTables.min.css" rel="stylesheet">
+<script src="../static/js/DataTables-1.10.18/js/jquery.dataTables.min.js"></script>
+<script src="../static/js/bootstrap/js/bootstrap.js"></script>
+<link href="../static/js/bootstrap/css/bootstrap.css" rel="stylesheet">
+<script src="../static/js/zTree_v3-master/js/jquery.ztree.core.min.js"></script>
+<link href="../static/js/zTree_v3-master/css/zTreeStyle/zTreeStyle.css" rel="stylesheet" type="text/css">
+<script>
+    $(document).ready(function () {
+        $('#example').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                url: "/test/queryShopBrand",
+                data: {},
+                type: "post",
+            },
+            "columns": [
+
+                {"data": "name"},
+                {"data": "telephone"},
+                {"data":"website",render:function (data,type,row,meta){
+                        return "<a href='"+data+"'>"+row.name+"</a>";
+                    }},
+                {"data": "status",render:function (data,type,row,meta){
+                         if (data=="1"){
+                             return data="可用";
+                         } else {
+                             return data="不可用";
+                         }
+                    }},
+                {"data": "typeName"},
+                {"data":"imagepath",render:function (data){
+                        return "<img src='"+data+"' width='50px'>";
+                    }},
+                {
+                    "data": "id", render: function (data,type,row,meta) {
+                        var buttons = "<button class=\"btn btn-danger\" type=\"button\" " +
+                            "onclick=\"productDelete(" + data + ")\"><i class=\"glyphicon glyphicon-trash\"></i>删除</button>"+
+                            "<button class=\"btn btn-danger\" type=\"button\" " +
+                            "onclick=\"productUpdate("+row.id+")\"><i class=\"glyphicon glyphicon-trash\"></i>修改</button>";
+                        return buttons;
+                    },
+                }
+            ],
+            "language": {
+                "url": "../static/Chinese.json",
+            },
+
+        })
+
+    });
+</script>
+<script>
+
+   function productUpdate(id){
+        $.post(
+            "/test/updateShopBrand",
+            {
+                "id":id
+            },
+            function (data){
+                $("#names").val(data.name);
+                $("#telephones").val(data.telephone);
+                $("#websites").val(data.website);
+                $("#avatarShows").attr("src",data.imagepath);
+                $("#typenames").val(data.typeName);
+                $("input[name='statuss'][value='"+data.status+"']").attr("checked",true);
+
+
+            }
+)
+
+}
+
+
+    function productDelete(id) {
+        if (confirm("确定删除！")) {
+            $.post(
+                "/test/delteShopBrand",
+                {
+                    "id": id
+                },
+                function (data) {
+                    if (data == "1") {
+                        alert("删除成功！")
+                        location.reload();
+                    } else {
+                        alert("删除失败！")
+                        location.reload();
+                    }
+                }
+            )
+        }
+    }
+
+
+
+</script>
+<body>
+<table id="example" class="display" style="border: 1px" >
+    <thead>
+    <tr>
+
+        <th>name</th>
+        <th>telephone</th>
+        <th>website</th>
+        <th>状态</th>
+        <th>旗下类型</th>
+        <th>imagepath</th>
+        <th>操作</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+
+</table>
+</body>
+<!--<center>
+<input type="hidden" id="imagepaths">
+品牌名称:<input id="names"><br>
+品牌电话:<input id="telephones"><br>
+品牌网站:<input id="websites"><br>
+品牌标志:<input type="file" id="files" onchange="uplaodFiles()"><br>
+<img src="" id="avatarShows" width="80px"><br>
+品牌类型:<input type="button" value="点我！" onclick="divLooks()"><br>
+<div id="div4" style="display:none" class="zTreeDemoBackground left">
+    <ul id="treeDemos" class="ztree"></ul>
+</div><br>
+<input id="typenames" readonly="readonly"><input type="button" value="删除一个类型" onclick="delType()"> <br>
+是否有效:<input type="radio" name="statuss" value="1">是
+<input type="radio" name="statuss" value="2">否
+</center>-->
+
+<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">添加</button>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">商品品牌添加</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="imagepath">
+                品牌名称:<input id="name"><br>
+                品牌电话:<input id="telephone"><br>
+                品牌网站:<input id="website"><br>
+                品牌标志:<input type="file" id="file" onchange="uplaodFile()"><br>
+<!--               < <img src="https://cyhupload.oss-cn-beijing.aliyuncs.com/APP/1574771898435.gif?Expires=1574775950&OSSAccessKeyId=TMP.hg1Yn1Bw5RjeWvp8BcmMVnskV3qVKZ9Frjaf75JKpy8f9xGWxSUFuxVPFpdE8ntB3v9Kbvaa7sBkFzk9HQmEFTEqkGFYJ4tTjRcba4KthXJHsWHRzLsSyCPzaKj9h8.tmp&Signature=%2Fv0OCYTJW6o%2F7MBUu7yyKPuY0U4%3D" id="avatarShow" width="30px"><br>-->
+                品牌类型:<input type="button" value="点我！" onclick="divLook()"><br>
+                <div id="div3" style="display:none" class="zTreeDemoBackground left">
+                    <ul id="treeDemo" class="ztree"></ul>
+                </div>
+                品牌类型:<input id="typename" ><br>
+                是否有效:<input type="radio" name="status" value="1">是
+                <input type="radio" name="status" value="2">否
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="addShopBrand()">提交</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<script>
+    function addShopBrand() {
+        var name = $("#name").val();
+        var telephone = $("#telephone").val();
+        var website = $("#website").val();
+        var typename = $("#typename").val();
+        var imagepath = $("#imagepath").val();
+        var status = "";
+        $("[name='status']:checked").each(function () {
+            status += this.value;
+        })
+        $.post(
+            "/test/addShopBrand",
+            {
+                "name": name,
+                "telephone": telephone,
+                "website": website,
+                "typeName": typename,
+                "imagepath": imagepath,
+                "status": status
+            },
+            function (data) {
+                if (data == "1") {
+                    alert("添加成功！")
+                    location.reload();
+                } else {
+                    alert("添加失败！")
+                    location.reload();
+                }
+            }
+        )
+
+    }
+</script>
+<script>
+    var setting = {
+        callback: {
+            onClick: zTreeOnClick
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                pIdKey: "pid"
+            },
+            key: {
+                name: "name"
+            }
+        }
+    };
+
+    function zTreeOnClick(event, treeId, treeNode) {
+        var names="";
+        var id = treeNode.id;
+        var name = treeNode.name;
+        names+=id+",";
+       $("#typename").val( $("#typename").val()+names);
+
+    };
+    $(document).ready(function () {
+        $.post(
+            "/test/queryType",
+            function (daa) {
+                zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, daa);
+                zTreeObj.expandAll(true);
+
+            }
+        );
+    });
+</script>
+<script>
+    function divLook() {
+        $("#div3").css("display", "");
+    }
+  /*  function divLooks() {
+        $("#div4").css("display", "");
+    }*/
+</script>
+<!--<script>
+    function uplaodFile() {
+        var form = new FormData();
+        form.append("file", $("#file").get(0).files[0]);
+        $.ajax({
+            contentType: false,
+            processData: false,
+            url: "/test/uploadFile",
+            data: form,
+            dataType: "json",
+            type: "post",
+            success: function (res) {
+
+                $("#imagepath").val(res.aaa);
+
+            },
+            erreo: function () {
+                alert("程序出现问题！")
+            }
+        })
+    }
+</script>-->
+<!--<script>
+    var setting = {
+        callback: {
+            onClick: zTreeOnClick
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                pIdKey: "pid"
+            },
+            key: {
+                name: "name"
+            }
+        }
+    };
+
+    function zTreeOnClick(event, treeId, treeNode) {
+        var names="";
+        var id = treeNode.id;
+        var name = treeNode.name;
+        names+=name+",";
+
+
+    };
+    $(document).ready(function () {
+        $.post(
+            "/test/queryType",
+            function (daa) {
+                zTreeObj = $.fn.zTree.init($("#treeDemos"), setting, daa);
+                zTreeObj.expandAll(true);
+
+            }
+        );
+    });
+</script>-->
+<!--<script>
+    function uplaodFiles() {
+        var form = new FormData();
+        form.append("file", $("#files").get(0).files[0]);
+        $.ajax({
+            contentType: false,
+            processData: false,
+            url: "/test/uploadFile",
+            data: form,
+            dataType: "json",
+            type: "post",
+            success: function (res) {
+
+                $("#imagepaths").val(res.aaa);
+
+            },
+            erreo: function () {
+                alert("程序出现问题！")
+            }
+        })
+    }
+</script>-->
+</html>

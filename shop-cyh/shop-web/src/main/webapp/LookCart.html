@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>购物车</title>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <link rel="stylesheet" href="static/carts/css/reset.css">
+    <link rel="stylesheet" href="static/carts/css/carts.css">
+</head>
+<script>
+    var token="";
+    if(sessionStorage.getItem("token")){
+        token=sessionStorage.getItem("token");
+    }
+    $(function() {
+        //ajax全局处理以及全部ajax请求附带token值
+        $.ajaxSetup({ //发送请求前触发
+            contentType: "application/x-www-form-urlencoded;charset=utf-8",
+            complete: function (XMLHttpRequest, textStatus) {
+                var nologin = XMLHttpRequest.getResponseHeader("NOLONGIN");
+                if (nologin == 6001) {
+                    window.location.href = "login/UserLogin.html";
+                }
+            },
+            beforeSend: function (xhr) { //可以设置自定义标头
+                // alert("获取的token值:"+token);
+                xhr.setRequestHeader('token', token);
+            }
+        })
+    })
+</script>
+<body>
+
+<section class="cartMain">
+
+    <div class="cartMain_hd">
+        <ul class="order_lists cartTop">
+            <li>
+                <!--所有商品全选-->
+               <button onclick="batchAll()">全选</button>
+
+            </li>
+            <li class="list_con">商品信息</li>
+            <li class="list_price">单价</li>
+            <li class="list_amount">数量</li>
+            <li class="list_sum">金额</li>
+            <li class="list_op">操作</li>
+        </ul>
+    </div>
+    <div class="cartBox">
+        <div class="order_content">
+
+        </div>
+    </div>
+
+    <!--底部-->
+    <div class="bar-wrapper">
+        <div class="bar-right">
+            <div class="piece">已选商品 <span id="counter"></span>件</div>
+            <div class="totalMoney">共计: <span id="totalAmount"></span></div>
+            <div class="calBtn"><a href="javascript:;" th:class="${counter!=0}?'btn_sty':''">结算</a></div>
+        </div>
+    </div>
+</section>
+<section class="model_bg"></section>
+<section class="my_model">
+    <p class="title">删除宝贝<span class="closeModel">X</span></p>
+    <p>您确认要删除该宝贝吗？</p>
+    <div class="opBtn"><a href="javascript:;" class="dialog-sure">确定</a><a href="javascript:;" class="dialog-close">关闭</a></div>
+</section>
+<script src="static/carts/js/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+/*查询购物车资料*/
+    $(function(){
+        queryCartInfo();
+    })
+    function queryCartInfo(){
+        $.get(
+            "http://localhost:9004/cartapi/queryCartInfo",
+            "json",
+            function(data) {
+                //cartList数据
+                var cartInfoList=data.data.cartList;
+                //cart选中总价格
+                var allPrice=data.data.allPrice;
+                //总件数
+                var allCount=data.data.allCount;
+                var cartHtml="";
+                for (var i=0;i<cartInfoList.length;i++){
+                   /* alert(cartInfoList[i].id)
+                    alert(cartInfoList[i].price)
+                    alert(cartInfoList[i].subtitle)
+                    alert(cartInfoList[i].productImg)
+                    alert(cartInfoList[i].productName)*/
+                    cartHtml+='<ul class="order_lists" >';
+                    cartHtml+='<li>';
+                    cartHtml+='<input type="checkbox" name="ccc" >';
+                    cartHtml+='<input type="radio"  onclick="radioCart('+cartInfoList[i].id+')">';
+                    if(cartInfoList[i].productSelect){
+                    cartHtml+='<label class="mark"></label>';
+                    }else {
+                        cartHtml+='<label></label>';
+                    }
+                    cartHtml+='</li>';
+                    cartHtml+='<li class="list_con">';
+                    cartHtml+='<div class="list_img"><a href="javascript:;">';
+                    cartHtml+='<img src="'+cartInfoList[i].productImg+'">';
+                    cartHtml+='</a></div>';
+                    cartHtml+='<div class="list_text"><a href="javascript:;">';
+                    cartHtml+='<span>'+cartInfoList[i].productName+'</span>';
+                    cartHtml+='</a></div>';
+                    cartHtml+='</li>';
+                    cartHtml+='<li class="list_price">';
+                    cartHtml+='<p class="price">￥<span>'+cartInfoList[i].price+'</span></p>';
+                    cartHtml+='</li>';
+                    cartHtml+='<li class="list_amount">';
+                    cartHtml+='<div class="amount_box">';
+                    cartHtml+='<a href="javascript:;" onclick="removeNUmProduct('+cartInfoList[i].id+')" class="reduce reSty">-</a>';
+                    cartHtml+='<input type="text"oldSum="'+cartInfoList[i].productCount+'"  class="sum" productId="'+cartInfoList[i].id+'" value="'+cartInfoList[i].productCount+'">';
+                    cartHtml+='<a href="javascript:;" onclick="addProduct('+cartInfoList[i].id+')" class="plus">+</a>';
+                    cartHtml+='</div>';
+                    cartHtml+='</li>';
+                    cartHtml+='<li class="list_sum">';
+                    cartHtml+='<p class="sum_price">￥<span>'+cartInfoList[i].productAllPrice+'</span></p>';
+                    cartHtml+='</li>';
+                    cartHtml+='<li class="list_op">';
+                    cartHtml+='<p class="del"><a href="javascript:;" onclick="deleteCart('+cartInfoList[i].id+')" class="delBtn">删除(⊙o⊙)？</a></p>';
+                    cartHtml+='</li>';
+                    cartHtml+='</ul>';
+               }
+                    $(".order_content").html(cartHtml);
+                    $("#counter").html(allCount);
+                    $("#totalAmount").html(allPrice);
+
+
+            }
+        )
+    }
+    /*删除*/
+    function deleteCart(id){
+      $.post(
+          "http://localhost:9004/cartapi/deleteCartInfo",
+          {
+              "id":id
+          },
+          function (data) {
+          if(data.code=="200"){
+             alert("删除收藏商品!")
+             queryCartInfo();
+          }else {
+             alert("删除失败！")
+          }
+          }
+      )
+    }
+    /*加减直接写 直接传最终个数过去 ，不用状态*/
+    /*减一个*/
+    function removeNUmProduct(id){
+      $.get(
+          "http://localhost:9004/cartapi/removeNUmProduct/"+id,
+          function(data){
+              if(data.code=="200"){
+                  alert("成功!")
+                  queryCartInfo();
+              }else {
+                  alert("失败！")
+              }
+          }
+      )
+    }
+    /*加一个*/
+    function addProduct(id){
+        $.get(
+            "http://localhost:9004/cartapi/addProduct/"+id,
+            function(data){
+                if(data.code=="200"){
+                    alert("成功!")
+                    queryCartInfo();
+                }else {
+                    alert("失败！")
+                }
+            }
+        )
+    }
+    /*全选*/
+    function batchAll(){
+        $.get(
+            "http://localhost:9004/cartapi/batchAll",
+            function(data){
+                if(data.code=="200"){
+                    queryCartInfo();
+                }
+            }
+        )
+
+    }
+/*单选*/
+    function radioCart(id){
+        $.get(
+            "http://localhost:9004/cartapi/radioCart/"+id,
+            function(data){
+                if(data.code=="200"){
+                    queryCartInfo();
+                }
+            }
+        )
+    }
+</script>
+</body>
+</html>
+

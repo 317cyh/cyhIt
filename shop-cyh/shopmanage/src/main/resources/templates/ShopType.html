@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="../static/js/jquery.1.9.min.js"></script>
+<script src="../static/js/jquery-3.3.1.min.js"></script>
+<script src="../static/js/zTree_v3-master/js/jquery.ztree.core.min.js"></script>
+<link href="../static/js/zTree_v3-master/css/zTreeStyle/zTreeStyle.css" rel="stylesheet" type="text/css">
+<body>
+<div class="zTreeDemoBackground left">
+    <ul id="treeDemo" class="ztree"></ul>
+</div>
+<center>
+    <div id="addDiv" style="display: none">
+        夫类型编号<input id="idid" readonly="readonly"><br><br>
+        夫类型名称<input id="idname" readonly="readonly"><br><br>
+        新增类型名称:<input id="idnames" type="text"><br><br>
+        是否有效:
+        是： <input type="radio" name="status" value="1">
+        否： <input type="radio" name="status" value="2"><br><br>
+        <input type="button" value="确认" onclick="addYes()">
+    </div>
+</center>
+<center>
+    <div style="display: none" id="div2">
+        修改类型名称: <input type="test" id="updateName"><br>
+        <input type="button" value="修改" onclick="uodateYes()">
+    </div>
+</center>
+<input type="button" value="增加" onclick="addPost()"><br>
+<input type="button" value="删除" onclick="deletePost()"><br>
+<input type="button" value="修改" onclick="updatePost()"><br>
+</body>
+<script>
+    function updatePost() {
+        $("#div2").css("display", "");
+    }
+
+    function uodateYes() {
+        var id = $("#idid").val();
+        var name = $("#updateName").val();
+
+        if (id == "") {
+            alert("选择一个类型进行修改操作！")
+        }
+        if (name == "") {
+            alert("请输入要修改的名称后进行修改操作！")
+        }
+        $.post(
+            "/test/updateShopType",
+            {
+                "id": id,
+                "name": name
+            },
+            function (data) {
+                if (data == "1") {
+                    alert("修改成功！")
+                    location.reload();
+                } else {
+                    alert("修改失败！")
+                    location.reload();
+                }
+            }
+        )
+    }
+</script>
+<script>
+    /*删除*/
+    function deletePost() {
+        var id = $("#idid").val();
+        if (id == "") {
+            alert("请选择一个！")
+        } else {
+            if (confirm("删除之后无法返回,谨慎处理！")) {
+                $.post(
+                    "/test/deleteShopType",
+                    {"id": id},
+                    function (data) {
+                        if (data == "1") {
+                            alert("删除成功！")
+                            location.reload();
+                        } else {
+                            alert("删除失败！")
+                            location.reload();
+                        }
+
+                    }
+                )
+
+
+            }
+        }
+    }
+</script>
+<script>
+    /*增加*/
+    function addYes() {
+        var pid = $("#idid").val();
+        var name = $("#idnames").val();
+        var status = "";
+        $("[name='status']:checked").each(function () {
+            status += this.value;
+        })
+        $.post(
+            "/test/addShopType",
+            {
+                "pid": pid,
+                "name": name,
+                "status": status
+            },
+            function (data) {
+                if (data == "1") {
+                    alert("新增成功！")
+                    location.reload();
+                } else {
+                    alert("新增失败！")
+                    location.reload();
+                }
+            }
+        )
+    }
+</script>
+<script>
+    var setting = {
+        callback: {
+            onClick: zTreeOnClick
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                pIdKey: "pid"
+            },
+            key: {
+                name: "name"
+            }
+        }
+    };
+
+    function zTreeOnClick(event, treeId, treeNode) {
+        var id = treeNode.id;
+        var name = treeNode.name;
+        $("#idid").val(id);
+        $("#idname").val(name);
+    };
+    $(document).ready(function () {
+        $.post(
+            "/test/queryType",
+            function (daa) {
+                zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, daa);
+                zTreeObj.expandAll(true);
+
+            }
+        );
+    });
+</script>
+<script>
+    function addPost() {
+        $("#addDiv").css("display", "");
+    }
+</script>
+</html>

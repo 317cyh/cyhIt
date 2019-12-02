@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shop.mapper.ShopMapper">
+    <!--查询商品类型-->
+    <select id="queryType" resultType="com.shop.model.ShopType">
+        select * from shop_type where status=1
+    </select>
+    <!--商品类型新增-->
+    <insert id="addShopType" parameterType="com.shop.model.ShopType">
+        insert into shop_type (pid,name,status)values(#{pid},#{name},#{status})
+    </insert>
+    <!--商品类型删除-->
+    <delete id="deleteShopType" parameterType="java.lang.String">
+        delete from shop_type where id=#{id}
+    </delete>
+    <!--商品类型删除-->
+    <delete id="deleteShopTypeTwo" parameterType="java.lang.String">
+        delete from shop_type where pid=#{id}
+    </delete>
+    <!--商品类型修改-->
+    <update id="updateShopType" parameterType="com.shop.model.ShopType">
+        update shop_type set name=#{name} where id=#{id}
+    </update>
+    <!--商品品牌查询条数-->
+    <select id="queryCountz" resultType="java.lang.Integer" parameterType="com.shop.model.ShopBrand">
+        select count(*) from shop_brand
+    </select>
+    <!--商品品牌查询数据-->
+    <select id="queryResource" resultType="com.shop.model.ShopBrand" parameterType="com.shop.model.ShopBrand">
+        select * from shop_brand limit #{start},#{length}
+    </select>
+    <!--商品品牌删除-->
+    <delete id="delteShopBrand" parameterType="java.lang.String">
+        delete from shop_brand where id=#{id}
+    </delete>
+    <!--商品品添加-->
+    <insert id="addShopBrand" parameterType="java.lang.String">
+        insert into shop_brand (name,telephone,website,typeName,imagepath,status)
+        values
+        (#{name},#{telephone},#{website},#{typeName},#{imagepath},#{status})
+    </insert>
+
+    <!--商品品添加-->
+    <insert id="addShopProduct" parameterType="com.shop.model.ShopProduct">
+        insert into t_shop_product (brand_id,name,subtitle,mainimg,detail,price,stock,status,create_time,type_id)
+        values
+        (#{brand_id},#{name},#{subtitle},#{main_img},#{detail},#{price},#{stock},#{status},#{create_time},#{type_id})
+    </insert>
+    <!--查询品牌id name-->
+    <select id="queryBrandId" resultType="com.shop.model.ShopBrand">
+        select id,name from shop_brand
+    </select>
+
+    <!--查询品牌id-->
+    <select id="updateShopBrand" resultType="com.shop.model.ShopBrand" parameterType="java.lang.String">
+        select * from shop_brand where id=#{id}
+    </select>
+</mapper>
+       

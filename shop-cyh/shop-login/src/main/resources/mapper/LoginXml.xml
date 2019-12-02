@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fh.dao.LoginMapper" >
+
+    <!--查询手机号-->
+    <select id="queryUserPhone" resultType="com.fh.model.UserBean" parameterType="java.lang.String">
+        select userphone,id,realname,cartid from user_enroll_zsgc where userphone=#{phone}
+    </select>
+    <!--添加-->
+    <insert id="addUser" parameterType="com.fh.model.UserBean">
+        insert into user_enroll_zsgc (userphone,cartid) values (#{userphone},#{cartid})
+    </insert>
+</mapper> 
+
+       
